@@ -1,1 +1,1 @@
-parser.js
+export default {}

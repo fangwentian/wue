@@ -6,8 +6,9 @@ const qname = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qname}`)
 const startTagClose = /^(\/?)>/
 const attribute = /^([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
-const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+const endTag = new RegExp(`^<\\/${qname}[^>]*>`)
 const whitespace = /^\s+/
+const text = /^[^\x00]/
 // TODO doctype, comment
 
 export default class Lexer {
@@ -16,10 +17,13 @@ export default class Lexer {
         this.rest = source;
         this.options = options;
         this.tokens = [];
-        this.state = [];
+        this.state = new State();
     }
 
     lexer() {
+        if(this.options.trim) {
+            this.rest = this.rest.trim();
+        }
         let token = this.advance();
         while (token && token.type !== 'eof') {
             this.tokens.push(token);
@@ -87,28 +91,37 @@ export default class Lexer {
     }
 
     startTagClose() {
-        
+        if(!this.state.is('startTagOpen')) return false;
+
+        const res = startTagClose.exec(this.rest);
+
+        if(res) {
+            this.state.pop();
+            this.skip(res[0].length);
+            return new Token('startTagClose', res[0]);
+        }
+        return false;
     }
 
     endTag() {
+        const res = endTag.exec(this.rest);
 
+        if(res) {
+            this.skip(res[0].length);
+            return new Token('endTag', res[0]);
+        }
+        return false;
     }
 
     text() {
+        if(this.state.is('startTagOpen')) return false;
 
+        const res = text.exec(this.rest);
+
+        if(res) {
+            this.skip(res[0].length);
+            return new Token('text', res[0]);
+        }
+        return false;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

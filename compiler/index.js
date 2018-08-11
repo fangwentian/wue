@@ -1,4 +1,4 @@
-import lexer from './lexer'
-import parse from './parser'
+import Lexer from './lexer'
+import Parser from './parser'
 
-export { lexer, parser }
+export { Lexer, Parser }

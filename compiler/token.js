@@ -1,4 +1,4 @@
-export class Token {
+export default class Token {
     constructor(type, value, extra) {
         this.type = type;
         
