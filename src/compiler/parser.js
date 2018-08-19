@@ -1,3 +1,9 @@
+const directiveList = [
+    'v-model',
+    'v-if',
+    'v-for'
+]
+
 export default class Parser {
     constructor({ tokens = [] } = {}) {
         this.tokens = tokens
@@ -52,13 +58,13 @@ export default class Parser {
     }
 
     tag() {
-        let { type, value, tag, isSelfCloseTag } = this.peek();
+        let { tag, isSelfCloseTag } = this.peek();
         const node = {
-            type,
-            value,
+            type: 'tag',
             tag,
             isSelfCloseTag,
             attributes: {},
+            directives: {},
             children: []
         }
 
@@ -69,7 +75,11 @@ export default class Parser {
         // set attributes
         while (this.peek().type === 'attribute') {
             let { value: { name: attrName, value: attrValue } } = this.peek()
-            node.attributes[attrName] = attrValue
+            if(directiveList.includes(attrName)) {
+                node.directives[attrName] = attrValue
+            } else {
+                node.attributes[attrName] = attrValue
+            }
             this.consume()
             this.skip('whitespace')
         }
@@ -102,16 +112,21 @@ export default class Parser {
 
     text() {
         let str = ''
+        let node = {}
 
         while(['text', 'whitespace'].includes(this.peek().type)) {
             str += this.peek().value
             this.consume()
         }
 
-        return {
-            type: 'text',
-            value: str
+        // 包含有插值
+        if(/{{.*}}/g.test(str)) {
+            node.type = 'interpolation'
+            node.value = str
+        } else {
+            node.type = 'text'
+            node.value = str
         }
+        return node
     }
-
 }
