@@ -1,4 +1,4 @@
-import { Lexer, Parser } from '../../index'
+import { Lexer, Parser, Codegen } from '../../index'
 
 const source = document.querySelector('#app').outerHTML
 
@@ -16,6 +16,6 @@ console.log(ast);
 
 const code = new Codegen({
     ast
-}).gen();
+}).codegen();
 
 console.log(code)

@@ -1,7 +1,7 @@
 // Source：
 // <div id="app">
 //     <input type="text" v-model="name">
-//     <p>{{name}}</p>
+//     <p>hello {{name}} world</p>
 //     <p v-if="isShow">if expression</p>
 //     <ul>
 //         <li v-for="item in items">{{item}}</li>
@@ -38,7 +38,7 @@
 //             }
 //         }), 
 //         _v(" "), 
-//         _c('p', [_v(_s(name))]),
+//         _c('p', [_v("hello "+_s(name)+" world")]),
 //         _v(" "), 
 //         (isShow) ? _c('p', [_v("if expression")]) : _e(), 
 //         _v(" "), 
@@ -52,23 +52,23 @@
 
 
 export default class Codegen {
-    constructor(ast) {
+    constructor({ ast = [] }) {
         this.ast = ast
         this.code = ''
     }
 
     codegen() {
-        if(!Array.isArray(this.ast) || this.ast.length > 0) {
+        if(!Array.isArray(this.ast) || this.ast.length > 1) {
             throw new Error('Expect one root element in template')
         }
-        this.gen(this.ast)
+        return `with(this) {return ${this.gen(this.ast)}}`
     }
 
     gen(ast) {
         if(Array.isArray(ast)) {
-            return ast.map(a = > return gen(a))
+            return ast.map(a => this.gen(a))
         }
-        return genNode(ast)
+        return this.genNode(ast)
     }
 
     genNode(node) {
@@ -84,16 +84,50 @@ export default class Codegen {
         }
     }
 
-    tag() {
-        
+    tag(node) {
+        let selfAttrs = {}
+
+        selfAttrs.attributes = node.attributes
+
+        selfAttrs.directives = Object.entries(node.directives).map(([key, value]) => {
+            return {
+                name: key.slice(2),
+                rawName: key,
+                value: `(${value})`,
+                expression: value
+            }
+        })
+
+        let res = `_c('${node.tag}', ${JSON.stringify(selfAttrs)}, [${this.gen(node.children)}])`
+
+        // TODO
+        // if(node.hasOwnProperty(for) && Object.keys(node.if).length > 0) {
+        // }
+
+        if(node.hasOwnProperty('if') && Object.keys(node.if).length > 0) {
+            res = `(${node.if}) ? ${res} : _e()`
+        }
+
+        return res;
     }
 
-    text() {
-
+    text(node) {
+        return `_v(${node.value})`
     }
 
-    interpolation() {
+    // 'i am {{name}}, {{years}} old' => 
+    // ["i am ", "{{name}}", ", ", "{{years}}", " old"] =>
+    // ""i am "+_s(name}})+", "+_s(years}})+" old""
+    interpolation(node) {
+        let temp = node.value.split(/({{.*?}})/g)
+        let str = temp.map((v) => {
+            if(/{{.*}}/.test(v)) {
+                return `_s(${v.replace(/{{|}}/g, '')})`
+            }
+            return `"${v}"`
+        }).join('+')
 
+        return `_v(${str})`
     }
 
 }

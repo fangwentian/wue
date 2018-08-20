@@ -1,9 +1,3 @@
-const directiveList = [
-    'v-model',
-    'v-if',
-    'v-for'
-]
-
 export default class Parser {
     constructor({ tokens = [] } = {}) {
         this.tokens = tokens
@@ -75,11 +69,21 @@ export default class Parser {
         // set attributes
         while (this.peek().type === 'attribute') {
             let { value: { name: attrName, value: attrValue } } = this.peek()
-            if(directiveList.includes(attrName)) {
-                node.directives[attrName] = attrValue
-            } else {
-                node.attributes[attrName] = attrValue
+
+            switch (attrName) {
+                case 'v-model':
+                    node.directives[attrName] = attrValue
+                    break
+                case 'v-if':
+                    node.if = attrValue
+                    break
+                case 'v-for':
+                    node.for = attrValue
+                    break
+                default:
+                    node.attributes[attrName] = attrValue
             }
+
             this.consume()
             this.skip('whitespace')
         }
