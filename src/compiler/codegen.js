@@ -100,9 +100,9 @@ export default class Codegen {
 
         let res = `_c('${node.tag}', ${JSON.stringify(selfAttrs)}, [${this.gen(node.children)}])`
 
-        // TODO
-        // if(node.hasOwnProperty(for) && Object.keys(node.if).length > 0) {
-        // }
+        if(node.hasOwnProperty('for') && Object.keys(node.for).length > 0) {
+            res = `_l((${node.for}), function(${node.alias}) {return ${res}}`
+        }
 
         if(node.hasOwnProperty('if') && Object.keys(node.if).length > 0) {
             res = `(${node.if}) ? ${res} : _e()`
@@ -112,7 +112,7 @@ export default class Codegen {
     }
 
     text(node) {
-        return `_v(${node.value})`
+        return `_v("${node.value}")`
     }
 
     // 'i am {{name}}, {{years}} old' => 

@@ -78,7 +78,9 @@ export default class Parser {
                     node.if = attrValue
                     break
                 case 'v-for':
-                    node.for = attrValue
+                    let temp = attrValue.split('in')
+                    node.for = temp[1].trim()
+                    node.alias = temp[0].trim()
                     break
                 default:
                     node.attributes[attrName] = attrValue
