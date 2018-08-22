@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lexer": "parcel ./examples/lexer/index.html",
     "parser": "parcel ./examples/parser/index.html",
-    "codegen": "parcel ./examples/codegen/index.html"
+    "codegen": "parcel ./examples/codegen/index.html",
+    "compiler": "parcel ./examples/mount/index.html"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/fangwentian/wue#readme",
   "devDependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "parcel-bundler": "^1.9.7"
   }
 }

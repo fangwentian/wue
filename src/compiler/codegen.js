@@ -61,7 +61,7 @@ export default class Codegen {
         if(!Array.isArray(this.ast) || this.ast.length > 1) {
             throw new Error('Expect one root element in template')
         }
-        return `with(this) {return ${this.gen(this.ast)}}`
+        return `console.log(this); return ${this.gen(this.ast)}`
     }
 
     gen(ast) {
@@ -76,7 +76,7 @@ export default class Codegen {
             case 'tag':
                 return this.tag(node)
             case 'text':
-                return this.text(node);
+                return this.text(node.value);
             case 'interpolation':
                 return this.interpolation(node);
             default:
@@ -101,18 +101,18 @@ export default class Codegen {
         let res = `_c('${node.tag}', ${JSON.stringify(selfAttrs)}, [${this.gen(node.children)}])`
 
         if(node.hasOwnProperty('for') && Object.keys(node.for).length > 0) {
-            res = `_l((${node.for}), function(${node.alias}) {return ${res}}`
+            res = `_l('${node.for}', function(${node.alias}) {return ${res}})`
         }
 
         if(node.hasOwnProperty('if') && Object.keys(node.if).length > 0) {
-            res = `(${node.if}) ? ${res} : _e()`
+            res = `(_s('${node.if}')) ? ${res} : ${this.text("")}`
         }
 
         return res;
     }
 
-    text(node) {
-        return `_v("${node.value}")`
+    text(value) {
+        return `_c('text', { attributes: {}, directives: {} }, [], { value: '${value}' })`
     }
 
     // 'i am {{name}}, {{years}} old' => 
@@ -124,10 +124,10 @@ export default class Codegen {
             if(/{{.*}}/.test(v)) {
                 return `_s(${v.replace(/{{|}}/g, '')})`
             }
-            return `"${v}"`
+            return `'${v}'`
         }).join('+')
 
-        return `_v(${str})`
+        return `_c('text', { attributes: {}, directives: {} }, [], { value: ${str} })`
     }
 
 }
