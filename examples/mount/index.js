@@ -8,4 +8,17 @@ const compiler = new Compiler({
 
 let { renderFn } = compiler.compile()
 
-compiler.$mount(renderFn)()
+let instance = {
+    data: {
+        name: 'fangwentian',
+        isShow: true,
+        items: ['one', 'two', 'three']
+    },
+    $get(key) {
+        return this.data[key]
+    }
+}
+
+let vdom = compiler.$mount(instance, renderFn)()
+
+console.log(vdom)

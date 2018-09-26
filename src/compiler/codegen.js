@@ -61,7 +61,7 @@ export default class Codegen {
         if(!Array.isArray(this.ast) || this.ast.length > 1) {
             throw new Error('Expect one root element in template')
         }
-        return `console.log(this); return ${this.gen(this.ast)}`
+        return `return ${this.gen(this.ast)}`
     }
 
     gen(ast) {
@@ -98,36 +98,36 @@ export default class Codegen {
             }
         })
 
-        let res = `_c('${node.tag}', ${JSON.stringify(selfAttrs)}, [${this.gen(node.children)}])`
+        let res = `_c.call(this, '${node.tag}', ${JSON.stringify(selfAttrs)}, [${this.gen(node.children)}])`
 
         if(node.hasOwnProperty('for') && Object.keys(node.for).length > 0) {
-            res = `_l('${node.for}', function(${node.alias}) {return ${res}})`
+            res = `_l.call(this, '${node.for}', function(${node.alias}) {return ${res}}.bind(this))`
         }
 
         if(node.hasOwnProperty('if') && Object.keys(node.if).length > 0) {
-            res = `(_s('${node.if}')) ? ${res} : ${this.text("")}`
+            res = `(_s.call(this, '${node.if}')) ? ${res} : ${this.text("")}`
         }
 
         return res;
     }
 
     text(value) {
-        return `_c('text', { attributes: {}, directives: {} }, [], { value: '${value}' })`
+        return `_c.call(this, 'text', { attributes: {}, directives: {} }, [], { value: '${value}' })`
     }
 
     // 'i am {{name}}, {{years}} old' => 
     // ["i am ", "{{name}}", ", ", "{{years}}", " old"] =>
-    // ""i am "+_s(name}})+", "+_s(years}})+" old""
+    // ""i am "+_s(name)+", "+_s(years)+" old""
     interpolation(node) {
         let temp = node.value.split(/({{.*?}})/g)
         let str = temp.map((v) => {
             if(/{{.*}}/.test(v)) {
-                return `_s(${v.replace(/{{|}}/g, '')})`
+                return `_s.call(this, '${v.replace(/{{|}}/g, '')}')`
             }
             return `'${v}'`
         }).join('+')
 
-        return `_c('text', { attributes: {}, directives: {} }, [], { value: ${str} })`
+        return `_c.call(this, 'text', { attributes: {}, directives: {} }, [], { value: ${str} })`
     }
 
 }

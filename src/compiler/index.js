@@ -13,8 +13,6 @@ export default class Compiler {
             source: this.template
         }).lexer()
 
-        console.log(tokens)
-
         const ast = new Parser({
             tokens
         }).parse()
@@ -23,7 +21,7 @@ export default class Compiler {
             ast
         }).codegen()
 
-        renderFnString = renderFnString.replace(/\n/g, '\\n');
+        renderFnString = renderFnString.replace(/\n/g, '\\n')
 
         return {
             renderFn: new Function(
@@ -34,20 +32,7 @@ export default class Compiler {
     }
 
     // only for test
-    $mount(renderFn) {
-        let instance = {
-            data: {
-                name: 'fangwentian',
-                isShow: false,
-                items: ['one', 'two', 'three']
-            },
-            $get(key) {
-                return this.data[key]
-            }
-        }
-
-        console.log(renderFn);
-
+    $mount(instance, renderFn) {
         return renderFn.bind(instance, _c, _l, _s)
 
     }

@@ -31,6 +31,7 @@ export default class Lexer {
             token = this.advance()
         }
         this.tokens.push(new Token('eof'))
+        console.log(this.tokens)
         return this.tokens
     }
 
