@@ -8,7 +8,8 @@
     "lexer": "parcel ./examples/lexer/index.html",
     "parser": "parcel ./examples/parser/index.html",
     "codegen": "parcel ./examples/codegen/index.html",
-    "compiler": "parcel ./examples/mount/index.html"
+    "compiler": "parcel ./examples/mount/index.html",
+    "dev": "parcel ./examples/demo/index.html"
   },
   "repository": {
     "type": "git",
